@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>黑马旅游网-我的收藏</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="../css/common.css">
+        <link rel="stylesheet" href="../css/index.css">
+        <style>
+           .tab-content .row>div {
+            margin-top: 16px;
+           } 
+           .tab-content {
+            margin-bottom: 36px;
+           }
+        </style>
+        <script src="../js/jquery-3.3.1.js"></script>
+        <script>
+            $(function (){
+                //1. 判断用户是否登录
+                $.get("user/username",{},function (user) {
+                    if(user){
+                        //调用load方法，发送ajax请求加载数据
+                        load(1);
+                    }else{
+                        //用户没有登录
+                        alert("您尚未登录，请登录");
+                        location.href="http://localhost:8080/login.html";
+                    }
+                })
+            })
+
+            function load(pageNo){
+                //用户登录了则获取收藏夹
+                $.ajax({
+                    type:"get",
+                    url:"favorite/list",
+                    data:{"pageNo":pageNo},
+                    success:function (page) {
+                        //解析返回数据
+                        //1、设置总条数、总页码
+                        var totalPage = Math.ceil(page.total/page.size);
+                        $("#totalPage").html(totalPage);
+                        $("#totalNum").html(page.total);
+
+                        //2、拼接分页条
+                        /*
+                            1、一共展示10个页码，能够达到前5后4的效果
+                            2、哪一边不够，则用另一边补齐
+                         */
+                        var lis = "";
+                        lis += '<li onclick="javascript:load(1)"><a href="javascript:void(0)">首页</a></li>';
+                        //上一页
+                        var beforeNum = (pageNo-1)>0?(pageNo-1):1;
+                        lis += '<li class="threeword" onclick="javascript:load('+beforeNum+')"><a href="javascript:void(0)">上一页</a></li>';
+
+                        var begin;  //开始位置
+                        var end;    //结束位置
+                        //判定要显示的10个页码
+                        if (totalPage < 10){
+                            //总页码小于10
+                            begin = 1;
+                            end = totalPage;
+                        }else{
+                            //总页码大于10
+                            begin = pageNo-5>1?pageNo-5:1;
+                            end = pageNo+4<totalPage?pageNo+4:totalPage;
+                        }
+
+                        for(var i=begin;i<=end;i++){
+                            //判断i是否等于当前页码
+                            if(i == pageNo){
+                                var li = '<li class="curPage" onclick="javascript:load('+i+')"><a href="javascript:void(0)">'+i+'</a></li>';
+                            }else{
+                                var li = '<li onclick="javascript:load('+i+')"><a href="javascript:void(0)">'+i+'</a></li>';
+                            }
+                            lis += li;
+                        }
+
+                        //下一页
+                        var nextNum = (pageNo+1)<=totalPage?(pageNo+1):totalPage;
+                        lis += '<li class="threeword" onclick="javascript:load('+nextNum+')"><a href="javascript:void(0)">下一页</a></li>';
+                        lis += '<li onclick="javascript:load('+totalPage+')"><a href="javascript:void(0)">末页</a></li>';
+                        //将lis内容设置到分页条
+                        $("#pageNum").html(lis);
+
+                        //3、拼接旅游信息
+                        var route_lis = "";
+                        for (var i=0;i<page.records.length;i++){
+                            var route = page.records[i];
+                            var li = '<div class="col-md-3">\n' +
+        '                                    <a href="route_detail.html?rid='+route.rid+'">\n' +
+        '                                        <img src="'+route.rimage+'" alt="">\n' +
+        '                                        <div class="has_border">\n' +
+        '                                            <h3>'+route.rname+'</h3>\n' +
+        '                                            <div class="price">网付价<em>￥</em><strong>'+route.price+'</strong><em>起</em></div>\n' +
+        '                                        </div>\n' +
+        '                                    </a>\n' +
+    '                                </div>'
+
+                            route_lis += li;
+                        }
+                        //将route_lis内容设置到界面
+                        $("#route").html(route_lis);
+
+                        //定位到页面顶部
+                        window.scrollTo(0,0);
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <!--引入头部-->
+    <div id="header"></div>
+         <!-- 排行榜 start-->
+        <section id="content">            
+            <section class="hemai_jx">
+                <div class="jx_top">
+                    <div class="jx_tit">
+                        <img src="../images/icon_5.jpg" alt="">
+                        <span>我的收藏</span>
+                    </div>                    
+                </div>
+                <div class="jx_content">
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <div id="route" class="row">
+                                <div class="col-md-3">
+                                    <a href="route_detail.html">
+                                        <img src="../images/collection_pic.jpg" alt="">
+                                        <div class="has_border">
+                                            <h3>上海直飞三亚5天4晚自由行(春节预售+亲子/蜜月/休闲游首选+豪华酒店任选+接送机)</h3>
+                                            <div class="price">网付价<em>￥</em><strong>889</strong><em>起</em></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>                       
+                    </div>
+                </div>
+                <div class="pageNum">
+                    <ul id="pageNum">
+                        <li><a href="">首页</a></li>
+                        <li class="threeword"><a href="#">上一页</a></li>
+                        <li><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">6</a></li>
+                        <li><a href="#">7</a></li>
+                        <li><a href="#">8</a></li>
+                        <li><a href="#">9</a></li>
+                        <li><a href="#">10</a></li>
+                        <li class="threeword"><a href="javascript:;">下一页</a></li>
+                        <li class="threeword"><a href="javascript:;">末页</a></li>
+                    </ul>
+                </div>
+            </section>                      
+        </section>
+        <!-- 排行榜 end-->
+    	
+         <!--引入尾部-->
+    	<div id="footer"></div>
+        <!--导入布局js，共享header和footer-->
+        <script type="text/javascript" src="../js/include.js"></script>
+    </body>
+</html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.holidaywork.dao.FavoriteMapper">
+
+
+    <select id="findPageByUid" resultType="com.example.holidaywork.pojo.Route">
+        select * from favorite join route on favorite.rid = route.rid
+        where uid=#{uid} limit #{begin},#{size}
+    </select>
+    <select id="findTotalByUid" resultType="java.lang.Integer">
+        select count(uid) from favorite where uid=#{uid}
+    </select>
+    <select id="findPageByCount" resultType="com.example.holidaywork.pojo.FavRoute">
+        select route.rid,rname,price,rimage,count(uid) favCount
+        from route join favorite f on route.rid = f.rid
+        group by rid,rname,price,rimage
+        limit #{begin},#{size}
+    </select>
+    <select id="findTotalCountByRid" resultType="_int">
+        select count(rid) from favorite
+    </select>
+</mapper>
